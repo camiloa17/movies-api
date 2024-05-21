@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"movies-backend/internal/models"
 	"net/http"
-	"time"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
@@ -19,63 +19,36 @@ func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 		Version: "v1.0.0",
 	}
 
-	out, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Println(err)
-		w.Write([]byte("oops something went wrong with jsoning the payload"))
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(out)
+	_ = app.WriteJSON(w, http.StatusOK, payload)
 }
 
 func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
-	var movies []models.Movie
+	movies, err := app.DBRepo.AllMovies()
+	if err != nil {
+		fmt.Println(err)
+		app.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
 
-	releaseDate, err := time.Parse("2006-01-02", "1986-03-07")
-	if err != nil {
-		fmt.Println(err)
-		w.Write([]byte("oops something went wrong with parsing the relase date"))
-		return
-	}
-	highLander := models.Movie{
-		ID:          1,
-		Title:       "High Lander",
-		ReleaseDate: releaseDate,
-		MPAARating:  "R",
-		RunTime:     116,
-		Image:       "no-image",
-		Description: "Just a movie",
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-	releaseDate, err = time.Parse("2006-01-02", "1991-06-12")
-	if err != nil {
-		fmt.Println(err)
-		w.Write([]byte("oops something went wrong with parsing the relase date"))
-		return
-	}
-	rotla := models.Movie{
-		ID:          2,
-		Title:       "Raiders of the old Arch",
-		ReleaseDate: releaseDate,
-		MPAARating:  "PG-13",
-		RunTime:     115,
-		Description: "Another movie",
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-	movies = append(movies, highLander, rotla)
+	_ = app.WriteJSON(w, http.StatusOK, movies)
+}
 
-	out, err := json.Marshal(movies)
+func (app *application) GetMovie(w http.ResponseWriter, r *http.Request) {
+	idString := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idString)
+
 	if err != nil {
 		fmt.Println(err)
-		w.Write([]byte("oops something went wrong with jsoning the payload"))
+		app.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(out)
+
+	movie, err := app.DBRepo.GetMovie(id)
+	if err != nil {
+		fmt.Println(err)
+		app.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	_ = app.WriteJSON(w, http.StatusOK, movie)
 }
