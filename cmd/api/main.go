@@ -19,6 +19,7 @@ const port = 8080
 type application struct {
 	Domain string
 	DBRepo repository.Repository
+	auth   Auth
 }
 
 func main() {
@@ -34,6 +35,23 @@ func main() {
 	if !ok {
 		log.Fatal("No DSN provided")
 	}
+	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtIssuer := os.Getenv("JWT_ISSUER")
+	jwtAudience := os.Getenv("JWT_AUDIENCe")
+	cookieDomain := os.Getenv("COOKIE_DOMAIN")
+	domain := os.Getenv("DOMAIN")
+	app.Domain = domain
+
+	app.auth = Auth{
+		Issuer:        jwtIssuer,
+		Audience:      jwtAudience,
+		Secret:        jwtSecret,
+		TokenExpiry:   time.Minute * 15,
+		RefreshExpiry: time.Hour * 24,
+		CookiePath:    "/",
+		CookieName:    "__Host-refresh_token",
+		CookieDomain:  cookieDomain,
+	}
 
 	pgConn, err := driver.NewPgStorage(dsn)
 	if err != nil {
@@ -43,7 +61,6 @@ func main() {
 
 	dbRepo := dbrepo.NewStorageRepo(pgConn.DB)
 
-	app.Domain = "example.com"
 	app.DBRepo = dbRepo
 
 	server := http.Server{

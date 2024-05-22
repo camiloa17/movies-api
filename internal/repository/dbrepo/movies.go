@@ -78,7 +78,7 @@ func (s *storageRepo) GetMovie(id int) (*models.Movie, error) {
 	)
 
 	if err == pgx.ErrNoRows {
-		return &movie, nil
+		return nil, nil
 	}
 
 	if err != nil {

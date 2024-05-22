@@ -13,13 +13,9 @@ type JSONResponse struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-func (app *application) WriteJSON(w http.ResponseWriter, statusCode int, data any, headers ...http.Header) error {
-	payload := JSONResponse{
-		Error:   false,
-		Message: "",
-		Data:    data,
-	}
-	out, err := json.Marshal(payload)
+func (app *application) SendJSON(w http.ResponseWriter, statusCode int, data any, headers ...http.Header) error {
+
+	out, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
@@ -40,6 +36,16 @@ func (app *application) WriteJSON(w http.ResponseWriter, statusCode int, data an
 	}
 
 	return nil
+
+}
+
+func (app *application) WriteJSON(w http.ResponseWriter, statusCode int, data any, headers ...http.Header) error {
+	payload := JSONResponse{
+		Error:   false,
+		Message: "",
+		Data:    data,
+	}
+	return app.SendJSON(w, statusCode, payload, headers...)
 }
 
 func (app *application) ReadJSON(w http.ResponseWriter, r *http.Request, data any) error {
@@ -76,5 +82,5 @@ func (app *application) ErrorJSON(w http.ResponseWriter, err error, status ...in
 		Message: err.Error(),
 	}
 
-	return app.WriteJSON(w, statusCode, payload)
+	return app.SendJSON(w, statusCode, payload)
 }
