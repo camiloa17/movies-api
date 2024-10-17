@@ -182,7 +182,7 @@ COPY public.movies_genres (id, movie_id, genre_id) FROM stdin;
 --
 
 COPY public.users (id, first_name, last_name, email, password, created_at, updated_at) FROM stdin;
-1	Admin	User	admin@example.com	$2a$14$wVsaPvJnJJsomWArouWCtusem6S/.Gauq/GjOIEHpyh2DAMmso1wy	2022-09-23 00:00:00	2022-09-23 00:00:00
+1	Admin	User	admin@example.com	$2a$14$f9tepNIVQoKO1MIg04WW2OuvacL8KV5VBgjDInkkTwjpZHMurLzv6	2022-09-23 00:00:00	2022-09-23 00:00:00
 \.
 
 

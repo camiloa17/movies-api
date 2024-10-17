@@ -57,6 +57,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	defer pgConn.DB.Close(context.Background())
 
 	dbRepo := dbrepo.NewStorageRepo(pgConn.DB)
