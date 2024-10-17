@@ -164,6 +164,12 @@ func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) MovieCatalog(w http.ResponseWriter, r *http.Request) {
+	movies, err := app.DBRepo.AllMovies()
+	if err != nil {
+		fmt.Println(err)
+		app.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
 
-	w.WriteHeader(http.StatusAccepted)
+	_ = app.WriteJSON(w, http.StatusOK, movies)
 }
